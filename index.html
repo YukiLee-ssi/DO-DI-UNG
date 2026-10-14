@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Hồ Sơ Dị Ứng & Thực Phẩm</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- html2canvas for downloading result card -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #F8FAFC 0%, #EEF2F6 100%);
+            color: #1E293B;
+            background-attachment: fixed;
+        }
+
+        .modern-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F1F5F9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-16 antialiased">
+
+    <!-- URL Discord Webhook -->
+    <script>
+        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1559822740092096626/DT2iNivdv3q0jWGtQqpQ5MTvkIJwGMfWDVahlYcANgV7cyhgA3aut_Q3IhpfW5bjxiWg";
+    </script>
+
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/80 py-8 px-4 text-center sticky top-0 z-30">
+        <div class="max-w-3xl mx-auto">
+            <span class="text-[11px] font-bold tracking-widest text-indigo-600 uppercase bg-indigo-50 px-3.5 py-1.5 rounded-full border border-indigo-100">Medical & Nutrition Profile</span>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 mt-3" id="main-header-title">
+                Hồ Sơ Dị Ứng & Sở Thích Thực Phẩm
+            </h1>
+            <p class="text-slate-500 text-sm mt-1 max-w-lg mx-auto font-medium">
+                Ghi chú chi tiết các nhóm thực phẩm, hải sản và trái cây để chủ động bảo vệ sức khỏe cá nhân.
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-3xl mx-auto px-4 mt-8 space-y-6">
+
+        <!-- User Name Input -->
+        <section class="modern-card rounded-2xl p-6">
+            <label class="block text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
+                <span>👤</span> Họ và tên / Biệt danh người lập hồ sơ:
+            </label>
+            <input type="text" id="user-name-input" oninput="updateHeaderName()" placeholder="Nhập tên của bạn..." 
+                class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-semibold text-slate-800 bg-white transition-all shadow-sm">
+        </section>
+
+        <!-- Food & Allergy Items Checklist -->
+        <section class="modern-card rounded-2xl p-6">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">Chi tiết thực phẩm & Hải sản</h2>
+                    <p class="text-xs text-slate-500 font-medium">Phân loại rõ từng loại để tránh nhầm lẫn.</p>
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="bg-slate-50/80 p-3.5 rounded-xl mb-5 flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-slate-600 border border-slate-200/60">
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-500 shadow-sm"></span> Dị ứng nặng (Tránh tuyệt đối)</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 shadow-sm"></span> Dị ứng nhẹ / Kén ăn</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 shadow-sm"></span> An toàn / Bình thường</span>
+            </div>
+
+            <!-- Items Container -->
+            <div id="food-list" class="space-y-3 max-h-[460px] overflow-y-auto pr-2">
+            </div>
+
+            <!-- Custom Food Input -->
+            <div class="mt-6 pt-5 border-t border-slate-100">
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Thêm thực phẩm / món ăn khác:</h3>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="custom-food-name" placeholder="Tên món ăn, thành phần cụ thể..." 
+                        class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white font-medium shadow-sm">
+                    <button onclick="addCustomFood()" 
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all shadow-sm">
+                        Thêm vào danh sách
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Additional Notes -->
+        <section class="modern-card rounded-2xl p-6 space-y-4">
+            <h2 class="text-lg font-bold text-slate-900">Ghi chú y tế & Lưu ý</h2>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1.5">Triệu chứng hoặc các chất phụ gia cần lưu ý thêm:</label>
+                <textarea id="allergy-notes" rows="3" placeholder="Ví dụ: Dị ứng sưng môi khi ăn tôm sú, khó tiêu khi uống sữa tươi nguyên chất..." 
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white shadow-sm"></textarea>
+            </div>
+        </section>
+
+        <!-- Submit Button -->
+        <div class="text-center pt-2">
+            <button onclick="generateSummary()" 
+                class="w-full md:w-auto bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-base font-bold px-10 py-4 rounded-xl shadow-lg transition-all active:scale-[0.98]">
+                ✨ Tạo Thẻ Hồ Sơ & Lưu Lệnh
+            </button>
+        </div>
+
+        <!-- Result Modal -->
+        <div id="result-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-6 relative border border-slate-200 shadow-2xl">
+                <!-- Close Button -->
+                <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-xl font-bold w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center transition-all">
+                    ✕
+                </button>
+
+                <!-- Exportable ID Card Content -->
+                <div id="capture-card" class="bg-gradient-to-b from-slate-50 via-white to-indigo-50/20 p-6 rounded-xl border border-slate-200 text-left relative overflow-hidden shadow-sm">
+                    <div class="border-b border-slate-200 pb-3 mb-4">
+                        <span class="text-[10px] font-extrabold tracking-widest text-indigo-600 uppercase">Official Nutrition Profile</span>
+                        <h3 class="text-xl font-bold text-slate-900 mt-0.5" id="res-user-name">Hồ sơ ẩn danh</h3>
+                        <p class="text-xs text-slate-500 mt-0.5 font-medium" id="res-date">Ngày cập nhật: Hôm nay</p>
+                    </div>
+
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <span class="font-bold text-rose-600 block mb-1">🚫 Cần tránh tuyệt đối (Dị ứng nặng):</span>
+                            <div id="res-severe" class="flex flex-wrap gap-1.5">
+                                <span class="text-slate-400 italic">Không có</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="font-bold text-amber-600 block mb-1">⚠️ Lưu ý / Dị ứng nhẹ:</span>
+                            <div id="res-mild" class="flex flex-wrap gap-1.5">
+                                <span class="text-slate-400 italic">Không có</span>
+                            </div>
+                        </div>
+
+                        <div id="res-notes-container" class="pt-2 border-t border-slate-100 hidden">
+                            <span class="font-bold text-slate-800 block mb-1">Ghi chú y tế:</span>
+                            <p class="text-slate-600 italic bg-white p-2.5 rounded-lg border border-slate-100" id="res-notes-text"></p>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 pt-3 border-t border-slate-200/80 flex items-center justify-between text-[10px] text-slate-400 font-bold">
+                        <span>Hồ Sơ Dinh Dưỡng & Sức Khỏe</span>
+                        <span>Confidential 🔒</span>
+                    </div>
+                </div>
+
+                <!-- Status indicator -->
+                <div id="send-status" class="text-center text-xs font-bold text-indigo-600 mt-3 hidden">
+                    Đang gửi thông tin lên hệ thống Discord...
+                </div>
+
+                <!-- Modal Action Buttons -->
+                <div class="mt-5 space-y-2">
+                    <button onclick="downloadCard()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl shadow-sm transition-all text-xs">
+                        Tải ảnh thẻ về máy
+                    </button>
+                    <button onclick="copyShareText()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl transition-all text-xs">
+                        Sao chép tóm tắt văn bản
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const initialFoodList = [
+            { id: 'tom', name: '🦐 Tôm (Tôm sú, tôm thẻ, tôm hùm...)', category: 'Hải sản', status: 2 },
+            { id: 'cuaghe', name: '🦀 Cua / Ghẹ / Ghẹ xanh', category: 'Hải sản', status: 2 },
+            { id: 'mucbachuong', name: '🦑 Mực / Bạch tuộc / Mực ống', category: 'Hải sản', status: 2 },
+            { id: 'ngaosoốc', name: '🦪 Ngao / Sò / Ốc / Hến / Vẹm', category: 'Hải sản', status: 2 },
+            { id: 'cabien', name: '🐟 Cá biển (Cá hồi, cá thu, cá ngừ...)', category: 'Hải sản', status: 2 },
+            { id: 'dauphong', name: '🥜 Đậu phộng / Lạc và các loại hạt', category: 'Hạt', status: 2 },
+            { id: 'suabo', name: '🥛 Sữa bò & sản phẩm từ sữa (Lactose)', category: 'Sữa', status: 2 },
+            { id: 'trung', name: '🥚 Trứng gà / Trứng vịt / Trứng cút', category: 'Thực phẩm', status: 2 },
+            { id: 'gluten', name: '🌾 Gluten / Lúa mì (Bánh mì, mì, bột lọc...)', category: 'Ngũ cốc', status: 2 },
+            { id: 'daunanh', name: '🌱 Đậu nành / Đậu tương & chế phẩm', category: 'Thực phẩm', status: 2 },
+            { id: 'traicaynhiêtđới', name: '🥭 Trái cây nhiệt đới (Xoài, dứa, mít...)', category: 'Trái cây', status: 2 },
+            { id: 'traicaykhac', name: '🍓 Kiwi / Đào / Dâu tây / Nhãn', category: 'Trái cây', status: 2 },
+            { id: 'cay', name: '🌶️ Gia vị cay nóng (Ớt sừng, tiêu mạnh)', category: 'Gia vị', status: 2 }
+        ];
+
+        const statusOptions = [
+            { level: 0, label: 'Dị ứng nặng', color: 'bg-rose-500 text-white border-rose-500' },
+            { level: 1, label: 'Dị ứng nhẹ', color: 'bg-amber-500 text-white border-amber-500' },
+            { level: 2, label: 'An toàn', color: 'bg-emerald-500 text-white border-emerald-500' }
+        ];
+
+        let foodDatabase = [...initialFoodList];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFoodList();
+        });
+
+        function updateHeaderName() {
+            const nameInput = document.getElementById('user-name-input').value.trim();
+            const headerTitle = document.getElementById('main-header-title');
+            if (nameInput) {
+                headerTitle.innerText = `Hồ Sơ Dị Ứng của ${nameInput}`;
+            } else {
+                headerTitle.innerText = `Hồ Sơ Dị Ứng & Sở Thích Thực Phẩm`;
+            }
+        }
+
+        function renderFoodList() {
+            const container = document.getElementById('food-list');
+            container.innerHTML = '';
+
+            foodDatabase.forEach((item) => {
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between p-3 rounded-xl border border-slate-200/80 bg-white/80 hover:border-indigo-200 hover:bg-white transition-all gap-2 shadow-2xs";
+
+                const currentStatus = item.status;
+
+                row.innerHTML = `
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <span class="text-xs font-bold text-slate-800 truncate">${item.name}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                        ${statusOptions.map(opt => `
+                            <button type="button" onclick="setFoodStatus('${item.id}',${opt.level})"
+                                class="px-2.5 py-1 text-[11px] font-bold rounded-lg border transition-all ${currentStatus === opt.level ? opt.color + ' shadow-sm' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'}">
+                                ${opt.label}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function setFoodStatus(id, status) {
+            const food = foodDatabase.find(f => f.id === id);
+            if (food) {
+                food.status = status;
+                renderFoodList();
+            }
+        }
+
+        function addCustomFood() {
+            const nameInput = document.getElementById('custom-food-name');
+            const name = nameInput.value.trim();
+
+            if (!name) {
+                alert('Vui lòng nhập tên thực phẩm!');
+                return;
+            }
+
+            const newItem = {
+                id: 'custom_' + Date.now(),
+                name: '✨ ' + name,
+                category: 'Khác',
+                status: 0
+            };
+
+            foodDatabase.unshift(newItem);
+            nameInput.value = '';
+            renderFoodList();
+        }
+
+        function generateSummary() {
+            const userName = document.getElementById('user-name-input').value.trim() || 'Người dùng ẩn danh';
+            const notes = document.getElementById('allergy-notes').value.trim();
+
+            document.getElementById('res-user-name').innerText = userName;
+            const today = new Date().toLocaleDateString('vi-VN');
+            document.getElementById('res-date').innerText = `Ngày tạo: ${today}`;
+
+            const severeItems = foodDatabase.filter(f => f.status === 0);
+            const mildItems = foodDatabase.filter(f => f.status === 1);
+
+            const severeContainer = document.getElementById('res-severe');
+            const mildContainer = document.getElementById('res-mild');
+
+            severeContainer.innerHTML = severeItems.length > 0 
+                ? severeItems.map(f => `<span class="bg-rose-50 text-rose-700 font-bold px-2 py-0.5 rounded border border-rose-200">${f.name}</span>`).join('')
+                : `<span class="text-slate-400 italic font-medium">Không có</span>`;
+
+            mildContainer.innerHTML = mildItems.length > 0 
+                ? mildItems.map(f => `<span class="bg-amber-50 text-amber-700 font-bold px-2 py-0.5 rounded border border-amber-200">${f.name}</span>`).join('')
+                : `<span class="text-slate-400 italic font-medium">Không có</span>`;
+
+            const notesContainer = document.getElementById('res-notes-container');
+            if (notes) {
+                document.getElementById('res-notes-text').innerText = notes;
+                notesContainer.classList.remove('hidden');
+            } else {
+                notesContainer.classList.add('hidden');
+            }
+
+            document.getElementById('result-modal').classList.remove('hidden');
+
+            sendDataToDiscord({
+                userName: userName,
+                severe: severeItems.map(f => f.name),
+                mild: mildItems.map(f => f.name),
+                notes: notes
+            });
+        }
+
+        function sendDataToDiscord(payload) {
+            if (!DISCORD_WEBHOOK_URL) return;
+
+            const statusEl = document.getElementById('send-status');
+            statusEl.classList.remove('hidden');
+
+            const fields = [
+                { name: "🚫 Dị ứng nặng (Tránh tuyệt đối)", value: payload.severe.length > 0 ? payload.severe.join(", ") : "Không có", inline: false },
+                { name: "⚠️ Dị ứng nhẹ / Kén ăn", value: payload.mild.length > 0 ? payload.mild.join(", ") : "Không có", inline: false },
+            ];
+
+            if (payload.notes) {
+                fields.push({ name: "📝 Ghi chú y tế", value: payload.notes, inline: false });
+            }
+
+            const embedPayload = {
+                username: "Hồ Sơ Sức Khỏe 🛡️",
+                embeds: [{
+                    title: `🛡️ HỒ SƠ DỊ ỨNG THỰC PHẨM: ${payload.userName.toUpperCase()}`,
+                    color: 0x4F46E5, // Màu indigo lịch sự
+                    fields: fields,
+                    footer: { text: "Medical & Nutrition Tracker • Discord Webhook" },
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            fetch(DISCORD_WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(embedPayload)
+            }).then(() => {
+                statusEl.innerText = "✅ Đã đồng bộ hồ sơ lên Discord thành công.";
+                setTimeout(() => statusEl.classList.add('hidden'), 3000);
+            }).catch(() => {
+                statusEl.innerText = "❌ Không thể kết nối đến Discord.";
+                setTimeout(() => statusEl.classList.add('hidden'), 3000);
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').classList.add('hidden');
+        }
+
+        function downloadCard() {
+            const card = document.getElementById('capture-card');
+            html2canvas(card, {
+                backgroundColor: null,
+                scale: 2
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'ho-so-di-ung-thuc-pham.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        function copyShareText() {
+            const name = document.getElementById('res-user-name').innerText;
+            const severe = Array.from(document.getElementById('res-severe').children).map(el => el.innerText).join(', ');
+            const mild = Array.from(document.getElementById('res-mild').children).map(el => el.innerText).join(', ');
+
+            const text = `🛡️ HỒ SƠ DỊ ỨNG THỰC PHẨM\n👤 Chủ nhân: ${name}\n🚫 Tránh tuyệt đối: ${severe || 'Không'}\n⚠️ Lưu ý nhẹ: ${mild || 'Không'}`;
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Đã sao chép tóm tắt hồ sơ!');
+                });
+            }
+        }
+    </script>
+</body>
+</html>
